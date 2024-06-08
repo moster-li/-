@@ -1,0 +1,450 @@
+//运动会管理系统
+#include <bits/stdc++.h>
+#include<windows.h>
+using namespace std;
+#define MAX_SCHOOLS 20
+#define MAX_PROJECTS 40
+#define MAX_NAME_LENGTH 50
+#define MAX_LINE_LENGTH 100
+#define MAX_ENTRIES 100
+
+
+
+/*录入项目信成绩信息*/ 
+void add_project() {
+	typedef struct {
+    	int project_id;//项目编号 
+    	char project_name[MAX_NAME_LENGTH];//项目名称 
+    	int rank;//项目排序 
+    	int school_id;//学校编号 
+    	int score;//项目积分 
+} Project;
+
+Project projects[MAX_PROJECTS];
+int num_schools = 0;
+int num_projects = 0;
+
+    printf("输入项目信息:\n");
+    printf("项目编号: ");
+    cin>>projects[num_projects].project_id;
+    printf("项目名称: ");
+    cin>>projects[num_projects].project_name;
+    printf("项目排序: ");
+    cin>>projects[num_projects].rank;
+    printf("学校编号: ");
+    cin>>projects[num_projects].school_id;
+    printf("总分: ");
+    cin>>projects[num_projects].score;
+    num_projects++;//这样只需要一个数组就可以输入全部的信息了 
+    
+    
+    /*		写入文件  		*/
+ 	ofstream outFile("sport.txt", ios::app); // 打开文件以追加方式写入
+    if (outFile.is_open()) {
+        outFile << projects[num_projects - 1].project_id <<"\t";
+        outFile << projects[num_projects - 1].project_name << "\t";
+        outFile << projects[num_projects - 1].rank << "\t";
+        outFile << projects[num_projects - 1].school_id <<"\t";
+        outFile << projects[num_projects - 1].score << endl;
+        outFile.close();
+    } else {
+        cout << "无法打开文件！" << endl;
+    }
+}
+
+ 
+/* 统计学校总分*/ 
+void sum_projiect(){
+struct temporary_time{
+	//创建临时结构体
+	int project_id_1;//项目编号 
+    char project_name[MAX_NAME_LENGTH];//项目名称 
+    int rank_1;//项目排序 
+    int school_id_1;//学校编号 
+    int score_1;//项目积分 
+}; 
+	  FILE *fp,*fp_output;
+    char filename[] = "sport.txt";
+    struct temporary_time temp;
+
+    // 打开文件
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        printf("无法打开文件 %s\n", filename);
+        exit(1);
+    }
+
+    int school_totals[MAX_SCHOOLS] = {0}; // 用于存储每个学校的总分，初始化为0
+
+    // 从文件中读取内容，并将其赋值给结构体
+    while (fscanf(fp, "%d %s %d %d %d", &temp.project_id_1, temp.project_name, &temp.rank_1, &temp.school_id_1, &temp.score_1) == 5) {
+        // 输出读取到的内容，这一步可以省略 
+        
+        // 更新相应学校的总分
+        school_totals[temp.school_id_1] += temp.score_1;
+    }
+
+    // 关闭文件
+    fclose(fp);
+    printf("\n每个学校的总分：\n");
+	cout<<"请稍等...\n";
+	Sleep(1145);
+
+    for (int i = 1; i < MAX_SCHOOLS; i++) {
+        if (school_totals[i] > 0) {
+            printf("学校编号 %d 项目总分：%d\n", i, school_totals[i]);
+        }
+    }
+
+   // 打开输出文件
+    fp_output = fopen("sum_schol.txt", "w");
+    if (fp_output == NULL) {
+        printf("无法打开文件");
+        exit(1);
+    }
+    // 将每个学校的总分写入输出文件
+    for (int i = 1; i < MAX_SCHOOLS; i++) {
+        if (school_totals[i] > 0) {
+            fprintf(fp_output, "%d %d\n", i, school_totals[i]);
+        }
+    }
+    
+    // 关闭输出文件
+    fclose(fp_output);
+}
+
+/* 查询学校信息*/
+void seach_school(){
+	FILE *fp;
+    int school_id, total_score;
+    int school_totals[MAX_SCHOOLS] = {0};
+
+    // 打开文件
+    fp = fopen("sum_schol.txt", "r");
+    if (fp == NULL) {
+        printf("无法打开文件\n");
+        exit(1);
+    }
+
+    // 从文件中读取每行数据，并将学校编号和总分存储在数组中
+    while (fscanf(fp, "%d %d\n", &school_id, &total_score) == 2) {
+        school_totals[school_id] = total_score;
+    }
+
+    // 关闭文件
+    fclose(fp);
+
+    // 请求用户输入学校编号
+    printf("请输入要查询的学校编号：");
+    scanf("%d", &school_id);
+	cout<<"请稍等...\n";
+	Sleep(1145);
+    // 检查输入的学校编号是否有效，并输出相应的总分
+    if (school_id >= 1 && school_id < MAX_SCHOOLS && school_totals[school_id] > 0) {
+        printf("学校编号 %d 总分为：%d\n", school_id, school_totals[school_id]);
+    } else {
+        printf("无效的学校编号或该学校无总分信息\n");
+    }
+
+} 
+ 	
+/*查询项目信息*/ 
+void seach_school_project(){
+	typedef struct {
+    	int project_number;
+    	char project_name[50];
+    	int project_order;
+    	int school_number;
+    	int score;
+} ProjectInfo;
+
+
+FILE *fp;
+
+    int school_id;
+    ProjectInfo projects[MAX_PROJECTS];
+    int num_projects = 0;
+
+    // 打开文件
+    fp = fopen("sport.txt", "r");
+    if (fp == NULL) {
+        printf("无法打开文件");
+        exit(1);
+    }
+
+    // 从文件中读取每行数据，并将项目信息存储在结构体数组中
+    while (fscanf(fp, "%d %s %d %d %d\n", &projects[num_projects].project_number, projects[num_projects].project_name,
+                    &projects[num_projects].project_order, &projects[num_projects].school_number, &projects[num_projects].score) == 5) {
+        num_projects++;
+    }
+
+    // 关闭文件
+    fclose(fp);
+
+    // 请求用户输入学校编号
+    printf("请输入要查询的学校编号：");
+    scanf("%d", &school_id);
+	cout<<"请稍等...\n";
+	Sleep(1145);
+    // 遍历项目信息数组，输出与指定学校相关的所有项目信息
+    printf("学校编号为%d 的项目信息：\n", school_id);
+    for (int i = 0; i < num_projects; i++) {
+        if (projects[i].school_number == school_id) {
+            printf("项目名称：%s，项目排名顺序：%d，项目积分：%d\n", projects[i].project_name, projects[i].project_order, projects[i].score);
+        }
+    }
+
+}
+
+
+void ui(){
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED); // 设置文本颜色为红色
+		printf("\n运动会成绩管理\n================\n");
+        printf("1．录入项目成绩信息\n");
+        printf("2．统计学校积分\n");
+        printf("3．查询学校积分\n");
+        printf("4．查询学校项目信息\n");
+        printf("5．按学校总积分排序\n");
+        printf("6．查询项目信息\n");
+        printf("7．查询获奖项目最多的学校\n");
+        printf("8．项目信息保存\n");
+        printf("0．退出系统\n");
+        printf("================\n");
+        printf("请选择（1-8，0：退出）：");
+}
+/*229-272  完成case5实现按总分升序输出*/ 
+typedef struct {
+    int school_number;
+    int total_score;
+} SchoolInfo;//创建临时结构体存储信息 
+
+
+int compare(const void *a, const void *b) {
+    const SchoolInfo *schoolA = (const SchoolInfo *)a;
+    const SchoolInfo *schoolB = (const SchoolInfo *)b;
+    return schoolA->total_score - schoolB->total_score;
+}//比较函数，升序排序   
+
+void compare_school(){
+	
+
+	FILE *fp;
+    SchoolInfo schools[MAX_SCHOOLS];
+    int num_schools = 0;
+
+    // 打开文件
+    fp = fopen("sum_schol.txt", "r");
+    if (fp == NULL) {
+        printf("无法打开文件");
+        exit(1);
+    }
+
+    // 从文件中读取每行数据，并将学校信息存储在结构体数组中
+    while (fscanf(fp, "%d %d\n", &schools[num_schools].school_number, &schools[num_schools].total_score) == 2) {
+        num_schools++;
+    }
+
+    // 关闭文件
+    fclose(fp);
+
+    // 使用qsort对学校信息数组按总积分进行升序排序
+    qsort(schools, num_schools, sizeof(SchoolInfo), compare);
+
+    // 打印排序后的结果
+    cout<<"请稍等...\n";
+	Sleep(1145);
+    printf("按总积分升序排序后的学校信息：\n");
+    for (int i = 0; i < num_schools; i++) {
+        printf("学校编号：%d，总积分：%d\n", schools[i].school_number, schools[i].total_score);
+    }
+
+}
+
+
+/* 	按项目编号或名称查询项目信息 */
+void seach_project(){
+	typedef struct {
+    int project_number;
+    char project_name[50];
+    int project_order;
+    int school_number;
+    int score;
+} ScoreInfo;
+	FILE *fp;
+    char filename[] = "sport.txt";
+    ScoreInfo scores[MAX_PROJECTS];
+    int num_scores = 0;
+    int search_project_number;
+    char search_project_name[50];
+    char buffer[100];
+
+    // 打开文件
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        printf("无法打开文件 %s\n", filename);
+        exit(1);
+    }
+
+    // 从文件中读取每行数据，并将成绩信息存储在结构体数组中
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        sscanf(buffer, "%d %s %d %d %d", &scores[num_scores].project_number, scores[num_scores].project_name,
+               &scores[num_scores].project_order, &scores[num_scores].school_number, &scores[num_scores].score);
+        num_scores++;
+    }
+
+    // 关闭文件
+    fclose(fp);
+
+    // 查询条件：项目编号或项目名称
+    printf("请输入要查询的项目编号或项目名称：\n");
+    scanf("%d", &search_project_number); // 或者使用 gets(search_project_name); 读取字符串
+    gets(search_project_name);
+	cout<<"请稍等...\n";
+	Sleep(1145);
+    // 遍历成绩信息数组，找到与查询条件匹配的成绩信息并打印
+    printf("查询结果：\n");
+    for (int i = 0; i < num_scores; i++) {
+        if (scores[i].project_number == search_project_number || strcmp(scores[i].project_name, search_project_name) == 0) {
+            printf("项目编号：%d，项目名称：%s，项目排序：%d，学校编号：%d，分数：%d\n",
+                   scores[i].project_number, scores[i].project_name, scores[i].project_order,
+                   scores[i].school_number, scores[i].score);
+        }
+    }
+}
+
+void max_school_project(){
+	typedef struct {
+    int project_number;
+    char project_name[50];
+    int project_order;
+    int school_number;
+    int score;
+} ScoreInfo;
+
+typedef struct {
+    int school_number;
+    int award_count;
+} SchoolAward;
+FILE *fp;
+    char filename[] = "sport.txt";
+    ScoreInfo scores[MAX_SCHOOLS];
+    SchoolAward schools[MAX_SCHOOLS];
+    int num_scores = 0;
+    int num_schools = 0;
+
+    // 打开文件
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        printf("无法打开文件 %s\n", filename);
+        exit(1);
+    }
+
+    // 从文件中读取每行数据，并将成绩信息存储在结构体数组中
+    while (fscanf(fp, "%d %s %d %d %d", &scores[num_scores].project_number, scores[num_scores].project_name,
+               &scores[num_scores].project_order, &scores[num_scores].school_number, &scores[num_scores].score) == 5) {
+        num_scores++;
+    }
+
+    // 关闭文件
+    fclose(fp);
+
+    // 统计每个学校获奖分数为5的次数
+    for (int i = 0; i < num_scores; i++) {
+        int current_school = scores[i].school_number;
+        int score = scores[i].score;
+
+        int found = 0;
+        for (int j = 0; j < num_schools; j++) {
+            if (schools[j].school_number == current_school) {
+                schools[j].award_count += (score == 5 ? 1 : 0);
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            schools[num_schools].school_number = current_school;
+            schools[num_schools].award_count = (score == 5 ? 1 : 0);
+            num_schools++;
+        }
+    }
+
+    // 找到最多获奖次数的学校
+    int max_awards = 0;
+    int max_school_number = -1;
+    for (int i = 0; i < num_schools; i++) {
+        if (schools[i].award_count > max_awards) {
+            max_awards = schools[i].award_count;
+            max_school_number = schools[i].school_number;
+        }
+    }
+
+    // 输出结果
+	cout<<"请稍等...\n";
+	Sleep(1145);
+    if (max_school_number != -1) {
+        printf("最多获奖次数学校编号为%d，获奖项目数：%d\n", max_school_number, max_awards);
+    } else {
+        printf("没有找到获奖次数最多的学校。\n");
+    }
+
+}
+
+
+int main(){
+	ui();
+	int choice;
+	cin>>choice;
+	
+	switch(choice){
+		case 1:{
+			add_project();
+			/*可以添加功能，实现多次输入 */
+	
+			break;
+		}
+		case 2:{
+			sum_projiect();
+			break;
+		}
+		case 3:{
+			seach_school();
+			break;
+		}
+		case 4:{
+			seach_school_project();
+			break;
+		}
+		case 5:{
+			compare_school();
+			break;
+		}
+		case 6:{
+			seach_project();
+			break;
+		}
+		case 7:{
+			max_school_project();
+			break;
+		}
+		case 8:{
+			cout<<"文件处理已经完成！\n";
+			cout<<"文件保存在根目录下sport.txt和sum_school.txt文本中。\n\n";
+			Sleep(1000); 
+			cout<<"sport.txt文件说明：\n文件中每一行第一个元素代表项目编号，\n第二个元素代表项目项目名称，\n";
+			cout<<"第三个元素代表项目排序，\n第四个元素代表学校编号，\n第五个元素代表学校分数。\n\n";
+			Sleep(1000);
+			cout<<"sum_school.txt文件说明：\n文件中每一行的第一个元素代表学校编号，第二个元素代表总分。"; 
+			break;
+		}
+		case 0:{
+			cout<<"您已退出系统，欢迎下次使用！";
+			Sleep(1000);
+			exit(1);
+		}
+		default:
+			cout<<"输入错误，请输入正确的选项!";
+			return 1;
+	} 
+
+}
